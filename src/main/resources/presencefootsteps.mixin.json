@@ -11,8 +11,6 @@
       "IEntity",
       "ILivingEntity",
       "MClientPlayNetworkHandler",
-      "MDebugHud",
-      "MLivingEntity",
-      "MSoundSystem"
+      "MLivingEntity"
     ]
 }

@@ -23,9 +23,9 @@ public abstract class JsonFile {
             .setPrettyPrinting()
             .create();
 
-    private transient Path file;
+    protected transient Path file;
 
-    JsonFile() {}
+    protected JsonFile() {}
 
     public JsonFile(Path file) {
         this.file = file;

@@ -1,13 +1,22 @@
 package eu.ha3.presencefootsteps;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 import eu.ha3.presencefootsteps.config.EntitySelector;
 import eu.ha3.presencefootsteps.config.JsonFile;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
+import me.shedaniel.clothconfig2.api.ConfigBuilder;
+import me.shedaniel.clothconfig2.api.ConfigCategory;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.EntityType;
 import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.MathHelper;
@@ -64,6 +73,11 @@ public class PFConfig extends JsonFile {
     // Default: 50
     private int maxSteppingEntities = 50;
 
+    // --- debug category ---
+    //
+    // Enables a visualiser to show where sound/material checks are occuring
+    private boolean visualiser = false;
+
     // --- sound category ---
     //
     // Sets whether footsteps should be generated for other players when in multiplayer
@@ -73,8 +87,6 @@ public class PFConfig extends JsonFile {
     // When enabled, special footstep sounds will be generated matching the boots you are wearing.
     // Note not all types of boots are supported. Modded boots may sound strange or not work.
     private boolean footwear = true;
-    // Enables a visualiser to show where sound/material checks are occuring
-    private boolean visualiser = false;
     // Sets whether to block vanilla footstep sounds when generating sounds for other entities or players
     private boolean exclusive = false;
 
@@ -82,7 +94,7 @@ public class PFConfig extends JsonFile {
     //
     // A list of entity type for any types of mobs that should never produce footsteps. Usually should be any flying 'bird' mobs.
     // Default: minecraft:ghast, minecraft:happy_ghast, minecraft:phantom
-    public final Set<Identifier> ignoredEntityTypes = new HashSet<>(Set.of(
+    public Set<Identifier> ignoredEntityTypes = new HashSet<>(Set.of(
                 Identifier.ofVanilla("ghast"),
                 Identifier.ofVanilla("happy_ghast"),
                 Identifier.ofVanilla("phantom")
@@ -95,34 +107,31 @@ public class PFConfig extends JsonFile {
     }
 
 
-    public boolean toggleMultiplayer() {
-        multiplayer = !multiplayer;
-        save();
-        return multiplayer;
+    public void setMultiplayer(boolean enabled) {
+        multiplayer = enabled;
     }
 
     public boolean isIgnoredForFootsteps(EntityType<?> type) {
         return ignoredEntityTypes.contains(Registries.ENTITY_TYPE.getId(type));
     }
 
-    public EntitySelector cycleTargetSelector() {
-        targetEntities = EntitySelector.VALUES[(getEntitySelector().ordinal() + 1) % EntitySelector.VALUES.length];
-        save();
-        return targetEntities;
+    public void setTargetSelector(EntitySelector newSelector) {
+        targetEntities = newSelector;
     }
 
-    public Locomotion setLocomotion(Locomotion loco) {
+    public void setLocomotion(Locomotion loco) {
         if (loco != getLocomotion()) {
             stance=loco;
-            save();
-            // pf.getEngine().reload();
+            PresenceFootsteps.getInstance().getEngine().reload();
         }
-
-        return loco;
     }
 
     public boolean isVisualiserRunning() {
         return visualiser;
+    }
+
+    public void setVisualiser(boolean enabled) {
+        visualiser = enabled;
     }
 
     public Locomotion getLocomotion() {
@@ -133,24 +142,24 @@ public class PFConfig extends JsonFile {
         return targetEntities == null ? EntitySelector.ALL : targetEntities;
     }
 
+    public void setGlobal(boolean enabled) {
+        global = enabled;
+    }
+
     public boolean getEnabledFootwear() {
         return footwear;
     }
 
-    public boolean toggleFootwear() {
-        footwear = !footwear;
-        save();
-        return footwear;
+    public void setFootwear(boolean enabled) {
+        footwear = enabled;
     }
 
     public boolean isExclusiveMode() {
         return exclusive;
     }
 
-    public boolean toggleExclusiveMode() {
-        exclusive = !exclusive;
-        save();
-        return exclusive;
+    public void setExclusiveMode(boolean enabled) {
+        exclusive = enabled;
     }
 
     public boolean getEnabledMP() {
@@ -161,18 +170,11 @@ public class PFConfig extends JsonFile {
         return Math.max(1, maxSteppingEntities);
     }
 
-    public boolean toggleDisabled() {
-        disabled = !disabled;
-        save();
-        // pf.onEnabledStateChange(!disabled);
-        return disabled;
-    }
-
-    public boolean setDisabled(boolean disabled) {
-        if (disabled != this.disabled) {
-            toggleDisabled();
+    public void setDisabled(boolean value) {
+        if (disabled != value) {
+            disabled = value;
+            PresenceFootsteps.getInstance().onEnabledStateChange(!value);
         }
-        return disabled;
     }
 
     public boolean getDisabled() {
@@ -191,27 +193,44 @@ public class PFConfig extends JsonFile {
         return MathHelper.clamp(runningVolumeIncrease, -100, 100);
     }
 
-    public float setGlobalVolume(float volume) {
-        int intVolume = volumeScaleToInt(volume);
-
-        if (this.volume != intVolume) {
+    public void setGlobalVolume(int volume) {
+        if (this.volume != volume) {
             boolean wasEnabled = getEnabled();
 
-            this.volume = intVolume;
-            save();
+            this.volume = volume;
 
-            //if (getEnabled() != wasEnabled) {
-            //    pf.onEnabledStateChange(getEnabled());
-            //}
+            if (getEnabled() != wasEnabled) {
+                PresenceFootsteps.getInstance().onEnabledStateChange(getEnabled());
+            }
         }
-
-        return getGlobalVolume();
     }
 
-    public float setRunningVolumeIncrease(float volume) {
-        runningVolumeIncrease = volume > 97 ? 100 : volume < -97 ? -100 : (int)volume;
-        save();
-        return getRunningVolumeIncrease();
+    public void setRunningVolumeIncrease(int volume) {
+        runningVolumeIncrease = volume;
+    }
+
+    public void setClientPlayerVolume(int volume) {
+        clientPlayerVolume = volume;
+    }
+    public void setHostileEntitiesVolume(int volume) {
+        hostileEntitiesVolume = volume;
+    }
+    public void setPassiveEntitiesVolume(int volume) {
+        passiveEntitiesVolume = volume;
+    }
+    public void setWetSoundsVolume(int volume) {
+        wetSoundsVolume = volume;
+    }
+    public void setFoliageSoundsVolume(int volume) {
+        foliageSoundsVolume = volume;
+    }
+
+    public void setMaxSteppingEntities(int count) {
+        maxSteppingEntities = count;
+    }
+
+    public void setIgnoredEntityTypes(List<String> newList) {
+        ignoredEntityTypes = newList.stream().map(Identifier::of).collect(Collectors.toSet());
     }
 
     public void populateCrashReport(CrashReportSection section) {
@@ -223,7 +242,125 @@ public class PFConfig extends JsonFile {
         section.add("Enabled Multiplayer", multiplayer);
     }
 
-    private static int volumeScaleToInt(float volume) {
-        return volume > 97 ? 100 : volume < 3 ? 0 : (int)volume;
+    public Screen build(Screen parent) {
+        ConfigBuilder builder = ConfigBuilder.create()
+                .setParentScreen(parent)
+                .setSavingRunnable(this::save)
+                .setTitle(Text.translatable("mod.presencefootsteps.name"));
+
+        ConfigCategory clientCategory = builder.getOrCreateCategory(Text.of("Client"));
+        clientCategory.addEntry(builder.entryBuilder().startBooleanToggle(Text.of("Disabled"), disabled)
+                .setDefaultValue(false)
+                .setTooltip(Text.of("Disables all functionality of the mod"))
+                .setSaveConsumer(this::setDisabled)
+                .build());
+        clientCategory.addEntry(builder.entryBuilder().startEnumSelector(Text.of("Stance"), Locomotion.class, stance)
+                .setDefaultValue(Locomotion.NONE)
+                .setTooltip(Text.of("""
+                        Sets the player's own stance (type of footsteps to generate)
+                        Options:
+                          NONE (determined by whether Mine Little Pony is installed)
+                          BIPED (always two-legged)
+                          QUADRUPED (always four-legged)
+                          FLYING (always four-legged + wings)
+                          FLYING_BIPED (always two-legged + wings)
+                        Default: NONE"""))
+                .setSaveConsumer(this::setLocomotion)
+                .build());
+        clientCategory.addEntry(builder.entryBuilder().startEnumSelector(Text.of("Target Entities"), EntitySelector.class, targetEntities)
+                .setDefaultValue(EntitySelector.ALL)
+                .setTooltip(Text.of("""
+                        Controls which group of entities to generate footsteps for
+                        Options:
+                          ALL, PLAYERS_AND_HOSTILES, PLAYERS_ONLY
+                        Default: ALL"""))
+                .setSaveConsumer(this::setTargetSelector)
+                .build());
+
+        ConfigCategory volumeCategory = builder.getOrCreateCategory(Text.of("Volume"));
+        volumeCategory.addEntry(builder.entryBuilder().startIntSlider(Text.of("Global Volume"), volume, 0, 100)
+                .setDefaultValue(70)
+                .setTooltip(Text.of("Sets the global footsteps volume"))
+                .setSaveConsumer(this::setGlobalVolume)
+                .build());
+        volumeCategory.addEntry(builder.entryBuilder().startIntSlider(Text.of("Running Volume Increase"), runningVolumeIncrease, -100, 100)
+                .setDefaultValue(0)
+                .setTooltip(Text.of("Controls how much the footsteps sound changes when running"))
+                .setSaveConsumer(this::setRunningVolumeIncrease)
+                .build());
+        volumeCategory.addEntry(builder.entryBuilder().startIntSlider(Text.of("Own Player Volume"), clientPlayerVolume, 0, 100)
+                .setDefaultValue(100)
+                .setTooltip(Text.of("Sets the volume of your own footsteps"))
+                .setSaveConsumer(this::setClientPlayerVolume)
+                .build());
+        volumeCategory.addEntry(builder.entryBuilder().startIntSlider(Text.of("Hostile Entities Volume"), hostileEntitiesVolume, 0, 100)
+                .setDefaultValue(100)
+                .setTooltip(Text.of("Sets the volume of hostile mob's footsteps"))
+                .setSaveConsumer(this::setHostileEntitiesVolume)
+                .build());
+        volumeCategory.addEntry(builder.entryBuilder().startIntSlider(Text.of("Passive Entities Volume"), passiveEntitiesVolume, 0, 100)
+                .setDefaultValue(50)
+                .setTooltip(Text.of("Sets the volume of passive and friendly mob's footsteps"))
+                .setSaveConsumer(this::setPassiveEntitiesVolume)
+                .build());
+        volumeCategory.addEntry(builder.entryBuilder().startIntSlider(Text.of("Wet Sounds Volume"), wetSoundsVolume, 0, 100)
+                .setDefaultValue(50)
+                .setTooltip(Text.of("Sets the volume of sounds generated by walking on wet surfaces during rain or thunderstorms"))
+                .setSaveConsumer(this::setWetSoundsVolume)
+                .build());
+        volumeCategory.addEntry(builder.entryBuilder().startIntSlider(Text.of("Foliage Sounds Volume"), foliageSoundsVolume, 0, 100)
+                .setDefaultValue(50)
+                .setTooltip(Text.of("Sets the volume of sounds generated due to walking through foliage and brush"))
+                .setSaveConsumer(this::setFoliageSoundsVolume)
+                .build());
+
+        ConfigCategory performanceCategory = builder.getOrCreateCategory(Text.of("Performance"));
+        performanceCategory.addEntry(builder.entryBuilder().startIntSlider(Text.of("Max Stepping Entities"), maxSteppingEntities, 1, 512)
+                .setDefaultValue(64)
+                .setTooltip(Text.of("Controls the maximum number of entities the mod can generate footsteps for in a single frame"))
+                .setSaveConsumer(this::setMaxSteppingEntities)
+                .build());
+
+        ConfigCategory debugCategory = builder.getOrCreateCategory(Text.of("Debug"));
+        debugCategory.addEntry(builder.entryBuilder().startBooleanToggle(Text.of("Enable Visualizer"), visualiser)
+                .setDefaultValue(false)
+                .setTooltip(Text.of("Enables a visualiser to show where sound/material checks are occurring"))
+                .setSaveConsumer(this::setVisualiser)
+                .build());
+
+        ConfigCategory soundCategory = builder.getOrCreateCategory(Text.of("Sound"));
+        soundCategory.addEntry(builder.entryBuilder().startBooleanToggle(Text.of("Multiplayer"), multiplayer)
+                .setDefaultValue(true)
+                .setTooltip(Text.of("Sets whether footsteps should be generated for other players when in multiplayer"))
+                .setSaveConsumer(this::setMultiplayer)
+                .build());
+        soundCategory.addEntry(builder.entryBuilder().startBooleanToggle(Text.of("Global"), global)
+                .setDefaultValue(true)
+                .setTooltip(Text.of("Sets whether footsteps should be generated for other (non-player) mobs"))
+                .setSaveConsumer(this::setGlobal)
+                .build());
+        soundCategory.addEntry(builder.entryBuilder().startBooleanToggle(Text.of("Footwear"), footwear)
+                .setDefaultValue(true)
+                .setTooltip(Text.of("""
+                        When enabled, special footstep sounds will be generated matching the boots you are wearing.
+                        Note not all types of boots are supported. Modded boots may sound strange or not work."""))
+                .setSaveConsumer(this::setGlobal)
+                .build());
+        soundCategory.addEntry(builder.entryBuilder().startBooleanToggle(Text.of("Disable Vanilla Footstep Sounds"), exclusive)
+                .setDefaultValue(false)
+                .setTooltip(Text.of("Sets whether to block vanilla footstep sounds when generating sounds for other entities or players"))
+                .setSaveConsumer(this::setExclusiveMode)
+                .build());
+
+        ConfigCategory compatibilityCategory = builder.getOrCreateCategory(Text.of("compatibility"));
+        compatibilityCategory.addEntry(builder.entryBuilder().startStrList(Text.of("Ignored Entities"), ignoredEntityTypes.stream().map(Identifier::toString).toList())
+                .setDefaultValue(List.of("ghast", "happy_ghast", "phantom"))
+                .setTooltip(Text.of("""
+                        A list of entity type for any types of mobs that should never produce footsteps.
+                        Usually should be any flying 'bird' mobs."""))
+                .setSaveConsumer(this::setIgnoredEntityTypes)
+                .build());
+
+        return builder.build();
     }
 }

@@ -62,14 +62,14 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
 
         if (source instanceof PlayerEntity) {
             if (PlayerUtil.isClientPlayer(source)) {
-                volume *= config.clientPlayerVolume.getPercentage();
+                volume *= config.clientPlayerVolume / 100.0F;
             } else {
-                volume *= config.otherPlayerVolume.getPercentage();
+                volume *= config.otherPlayerVolume / 100.0F;
             }
         } else if (source instanceof HostileEntity) {
-            volume *= config.hostileEntitiesVolume.getPercentage();
+            volume *= config.hostileEntitiesVolume / 100.0F;
         } else {
-            volume *= config.passiveEntitiesVolume.getPercentage();
+            volume *= config.passiveEntitiesVolume / 100.0F;
         }
 
         float runningProgress = ((StepSoundSource) source).getStepGenerator(this)
@@ -115,7 +115,7 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     }
 
     private Stream<? extends Entity> getTargets(final Entity cameraEntity) {
-        final List<? extends Entity> entities = cameraEntity.getWorld().getOtherEntities(null, cameraEntity.getBoundingBox().expand(16), e -> {
+        final List<? extends Entity> entities = cameraEntity.getEntityWorld().getOtherEntities(null, cameraEntity.getBoundingBox().expand(16), e -> {
             return e instanceof LivingEntity
                     && !config.isIgnoredForFootsteps(e.getType())
                     && !(e instanceof WaterCreatureEntity)
@@ -185,13 +185,13 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     }
 
     @Override
-    public CompletableFuture<Void> reload(Synchronizer sync, ResourceManager sender, Executor serverExecutor, Executor clientExecutor) {
-        return sync.whenPrepared(Unit.INSTANCE).thenRunAsync(() -> {
+    public CompletableFuture<Void> reload(Store store, Executor prepareExecutor, Synchronizer reloadSynchronizer, Executor applyExecutor) {
+        return reloadSynchronizer.whenPrepared(Unit.INSTANCE).thenRunAsync(() -> {
             Profiler profiler = Profilers.get();
             profiler.push("Reloading PF Sounds");
-            reloadEverything(sender);
+            reloadEverything(store.getResourceManager());
             profiler.pop();
-        }, clientExecutor);
+        }, prepareExecutor);
     }
 
     public void reloadEverything(ResourceManager manager) {

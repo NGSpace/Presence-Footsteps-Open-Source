@@ -29,11 +29,7 @@
     "minecraft": "${minecraftVersion}",
     "fabricloader": "${loaderVersion}",
     "java": ">=21",
-    "fabric-api": "${fabricVersion}",
-    "kirin": "${kirinVersion}"
-  },
-  "suggests": {
-    "minelp": "${minelpVersion}"
+    "fabric-api": "${fabricVersion}"
   },
   "custom": {
     "modmenu": {
