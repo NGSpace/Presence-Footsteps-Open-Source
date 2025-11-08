@@ -1,10 +1,23 @@
-# Presence-Footsteps
-[![Build Status](https://github.com/Sollace/Presence-Footsteps/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/MineLittlePony/Kirin/actions/workflows/gradle-build.yml)
-[![Version](https://img.shields.io/github/v/release/Sollace/Presence-Footsteps)](https://github.com/Sollace/Presence-Footsteps/releases/latest)
-![License](https://img.shields.io/github/license/Sollace/Presence-Footsteps)
+# Presence-Footsteps Lite
+[![Build Status](https://github.com/amiralimollaei/Presence-Footsteps-Lite/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/MineLittlePony/Kirin/actions/workflows/gradle-build.yml)
+[![Version](https://img.shields.io/github/v/release/amiralimollaei/Presence-Footsteps-Lite)](https://github.com/amiralimollaei/Presence-Footsteps-Lite/releases/latest)
+![License](https://img.shields.io/github/license/amiralimollaei/Presence-Footsteps-Lite)
 ![](https://img.shields.io/badge/api-fabric-orange.svg)
 
-_..An Overly complicated Sound Mod..._
+_...An Overly Complicated Sound Mod Made Slightly Less Complicated..._
+
+This is a Fork of Sollace's Fork of Huricaaan (Ha3)'s original mod that removes technical debt, this fork should be far easier to maintain, and faster to update to the latest versions of the game, while being more flexible.
+
+Removed Dependencies:
+
+- kirin Fabric GUI library: used for the configuration menu, replaced with YetAnotherConfigLib as kirin usually lags behind the latest minecraft versions.
+- Mine Little Pony Fabric mod: compatibility for the Mine Little Pony mod that turns players and mobs into Ponies, the compatibility is dropped as it is not a widely used feature
+
+> Removing these dependencies should not effect the functionality of the mod for most people, while having them forces support for newer minecraft versions to come with significant delay, sometimes by up to several weeks.
+
+Removing these dependencies enables us to maintain this mod way easier and faster in the future, and potentially enable support for Forge and other mod loaders.
+
+## Original README:
 
 ---
 

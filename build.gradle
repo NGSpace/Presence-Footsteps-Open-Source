@@ -82,7 +82,7 @@ modrinth {
     //featured = true
     versionNumber = version.toString()
     versionName = archivesBaseName + '-' + version
-    changelog = "[Changelog](https://github.com/Sollace/Presence-Footsteps/releases/tag/${version.toString()})"
+    changelog = "[Changelog](https://github.com/amiralimollaei/Presence-Footsteps-Lite/releases/tag/${version.toString()})"
     loaders = ['fabric', 'quilt']
     uploadFile = remapJar
     outlet.mcVersions().each{ver ->
