@@ -70,19 +70,16 @@ public class MotionTracker {
         }
 
         if (ply instanceof OtherClientPlayerEntity) {
-            if (ply.getEntityWorld().getTime() % 1 == 0) {
+            if (motionX != 0 || motionZ != 0) {
+                ply.distanceTraveled += Math.sqrt(Math.pow(motionX, 2) + Math.pow(motionY, 2) + Math.pow(motionZ, 2)) * 0.8;
+            } else {
+                ply.distanceTraveled += Math.sqrt(Math.pow(motionX, 2) + Math.pow(motionZ, 2)) * 0.8;
+            }
 
-                if (motionX != 0 || motionZ != 0) {
-                    ply.distanceTraveled += Math.sqrt(Math.pow(motionX, 2) + Math.pow(motionY, 2) + Math.pow(motionZ, 2)) * 0.8;
-                } else {
-                    ply.distanceTraveled += Math.sqrt(Math.pow(motionX, 2) + Math.pow(motionZ, 2)) * 0.8;
-                }
-
-                if (ply.isOnGround()) {
-                    ply.fallDistance = 0;
-                } else if (motionY < 0) {
-                    ply.fallDistance -= motionY * 200;
-                }
+            if (ply.isOnGround()) {
+                ply.fallDistance = 0;
+            } else if (motionY < 0) {
+                ply.fallDistance -= motionY * 200;
             }
         }
     }

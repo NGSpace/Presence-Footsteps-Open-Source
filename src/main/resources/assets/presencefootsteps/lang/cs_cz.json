@@ -6,7 +6,7 @@
 	"menu.pf.global.all": "Entitiy: všechny",
 	"menu.pf.global.players_only": "Entity: hráč",
 	"menu.pf.volume.min": "Hlasitost: VYP",
-	"menu.pf.volume": "Hlasitost: %d%%",
+	"menu.pf.volume": "Hlasitost",
 	"menu.pf.stance": "Postavení: %s",
 	"menu.pf.stance.auto": "Automaticky",
 	"menu.pf.stance.none": "Žádné",

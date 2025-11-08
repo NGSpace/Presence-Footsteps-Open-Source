@@ -80,22 +80,23 @@ public class DelayedSoundPlayer implements SoundPlayer {
         }
 
         public boolean tick() {
-            switch (nextState(currentTime)) {
-                case PLAYING:
+            return switch (nextState(currentTime)) {
+                case PLAYING -> {
                     immediate.playSound(location, soundName, volume, pitch, options);
-                    return false;
-                case SKIPPING:
-                    return true;
-                default:
+                    yield false;
+                }
+                case SKIPPING -> true;
+                default -> {
                     nextPlayTime = timeToPlay;
-                    return false;
-            }
+                    yield false;
+                }
+            };
         }
 
         private State nextState(long time) {
             if (time >= timeToPlay || USING_EARLYNESS && time >= timeToPlay - Math.pow(maximum, EARLYNESS_THRESHOLD_POW)) {
                 if (USING_EARLYNESS && time < timeToPlay) {
-                    PresenceFootsteps.logger.debug("Playing early sound (early by " + (timeToPlay - time) + "ms, tolerence is " + Math.pow(maximum, EARLYNESS_THRESHOLD_POW));
+                    PresenceFootsteps.logger.debug("Playing early sound (early by {}ms, tolerence is {}", timeToPlay - time, Math.pow(maximum, EARLYNESS_THRESHOLD_POW));
                 }
 
                 long lateness = time - timeToPlay;
@@ -106,7 +107,7 @@ public class DelayedSoundPlayer implements SoundPlayer {
                     return State.PLAYING;
                 }
 
-                PresenceFootsteps.logger.debug("Skipped late sound (late by " + lateness + "ms, tolerence is " + maximum / LATENESS_THRESHOLD + "ms)");
+                PresenceFootsteps.logger.debug("Skipped late sound (late by {}ms, tolerence is {}ms)", lateness, maximum / LATENESS_THRESHOLD);
 
                 return State.SKIPPING;
             }

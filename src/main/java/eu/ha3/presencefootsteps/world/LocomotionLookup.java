@@ -31,10 +31,10 @@ public class LocomotionLookup implements Index<Entity, Locomotion> {
 
     @Override
     public Locomotion lookup(Entity key) {
-        if (key instanceof PlayerEntity player) {
-            return Locomotion.forPlayer(player, config.getLocomotion());
+        if (key instanceof PlayerEntity) {
+            return config.getLocomotion();
         }
-        return Locomotion.forLiving(key, values.getOrDefault(EntityType.getId(key.getType()), Locomotion.BIPED));
+        return Locomotion.BIPED;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class LocomotionLookup implements Index<Entity, Locomotion> {
         Identifier id = Identifier.of(key);
 
         if (!Registries.ENTITY_TYPE.containsId(id)) {
-            PresenceFootsteps.logger.warn("Locomotion registered for unknown entity type " + id);
+            PresenceFootsteps.logger.warn("Locomotion registered for unknown entity type {}", id);
         }
 
         values.put(id, Locomotion.byName(value.getAsString().toUpperCase()));
@@ -59,7 +59,7 @@ public class LocomotionLookup implements Index<Entity, Locomotion> {
             Identifier id = EntityType.getId(type);
             if (full || !contains(id)) {
                 if (type.create(MinecraftClient.getInstance().world, SpawnReason.CHUNK_GENERATION) instanceof LivingEntity) {
-                    writer.field(id.toString(), values.getOrDefault(id, Locomotion.NONE).name());
+                    writer.field(id.toString(), values.getOrDefault(id, Locomotion.BIPED).name());
                 }
             }
         });

@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
+import eu.ha3.presencefootsteps.sound.generator.StepSoundGenerator;
 import net.minecraft.resource.ResourceReloader;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,8 +29,6 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.ShulkerEntity;
 import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.AbstractMinecartEntity;
-import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.sound.SoundCategory;
@@ -62,17 +61,17 @@ public class SoundEngine implements ResourceReloader {
 
         if (source instanceof PlayerEntity) {
             if (PlayerUtil.isClientPlayer(source)) {
-                volume *= config.clientPlayerVolume.getPercentage();
+                volume *= config.clientPlayerVolume;
             } else {
-                volume *= config.otherPlayerVolume.getPercentage();
+                volume *= config.otherPlayerVolume;
             }
         } else if (source instanceof HostileEntity) {
-            volume *= config.hostileEntitiesVolume.getPercentage();
+            volume *= config.hostileEntitiesVolume;
         } else {
-            volume *= config.passiveEntitiesVolume.getPercentage();
+            volume *= config.passiveEntitiesVolume;
         }
 
-        float runningProgress = ((StepSoundSource) source).getStepGenerator(this)
+        float runningProgress = ((StepSoundSource) source).presenceFootsteps$getStepGenerator(this)
                 .map(generator -> generator.getMotionTracker().getSpeedScalingRatio(source))
                 .orElse(0F);
 
@@ -100,7 +99,7 @@ public class SoundEngine implements ResourceReloader {
     }
 
     public boolean isEnabledFor(Entity entity) {
-        return hasData() && isRunning(MinecraftClient.getInstance()) && config.getEntitySelector().test(entity);
+        return isRunning(MinecraftClient.getInstance()) && config.getEntitySelector().test(entity);
     }
 
     public boolean hasData() {
@@ -115,21 +114,17 @@ public class SoundEngine implements ResourceReloader {
     }
 
     private Stream<? extends Entity> getTargets(final Entity cameraEntity) {
-        final List<? extends Entity> entities = cameraEntity.getEntityWorld().getOtherEntities(null, cameraEntity.getBoundingBox().expand(16), e -> {
-            return e instanceof LivingEntity
-                    && !config.isIgnoredForFootsteps(e.getType())
-                    && !(e instanceof WaterCreatureEntity)
-                    && !(e instanceof ShulkerEntity
-                            || e instanceof ArmorStandEntity
-                            || e instanceof BoatEntity
-                            || e instanceof AbstractMinecartEntity)
-                        && !isolator.golems().contains(e.getType())
-                        && !e.hasVehicle()
-                        && !((LivingEntity)e).isSleeping()
-                        && (!(e instanceof PlayerEntity) || !e.isSpectator())
-                        && e.squaredDistanceTo(cameraEntity) <= 256
-                        && config.getEntitySelector().test(e);
-        });
+        final List<? extends Entity> entities = cameraEntity.getEntityWorld().getOtherEntities(null, cameraEntity.getBoundingBox().expand(16), e -> e instanceof LivingEntity
+                && !config.isIgnoredForFootsteps(e.getType())
+                && !(e instanceof WaterCreatureEntity)
+                && !(e instanceof ShulkerEntity || e instanceof ArmorStandEntity)
+                && !isolator.golems().contains(e.getType())
+                && !e.hasVehicle()
+                && !((LivingEntity)e).isSleeping()
+                && (!(e instanceof PlayerEntity) || !e.isSpectator())
+                && e.squaredDistanceTo(cameraEntity) <= 256
+                && config.getEntitySelector().test(e)
+        );
 
         final Comparator<Entity> nearest = Comparator.comparingDouble(e -> e.squaredDistanceTo(cameraEntity));
 
@@ -148,9 +143,7 @@ public class SoundEngine implements ResourceReloader {
         if (isRunning(client)) {
             getTargets(cameraEntity).forEach(e -> {
                 try {
-                    ((StepSoundSource) e).getStepGenerator(this).ifPresent(generator -> {
-                        generator.generateFootsteps();
-                    });
+                    ((StepSoundSource) e).presenceFootsteps$getStepGenerator(this).ifPresent(StepSoundGenerator::generateFootsteps);
                 } catch (Throwable t) {
                     CrashReport report = CrashReport.create(t, "Generating PF sounds for entity");
                     CrashReportSection section = report.addElement("Entity being ticked");
@@ -170,13 +163,12 @@ public class SoundEngine implements ResourceReloader {
         }
     }
 
-    public boolean onSoundRecieved(@Nullable RegistryEntry<SoundEvent> event, SoundCategory category) {
-        return event != null && isRunning(MinecraftClient.getInstance()) && event.getKeyOrValue().right().filter(sound -> {
-            return sound == SoundEvents.ENTITY_PLAYER_SWIM
-                || sound == SoundEvents.ENTITY_PLAYER_SPLASH
-                || sound == SoundEvents.ENTITY_PLAYER_BIG_FALL
-                || sound == SoundEvents.ENTITY_PLAYER_SMALL_FALL;
-        }).isPresent();
+    public boolean onSoundReceived(@Nullable RegistryEntry<SoundEvent> event, SoundCategory category) {
+        return event != null && isRunning(MinecraftClient.getInstance()) && event.getKeyOrValue().right().filter(
+                sound -> sound == SoundEvents.ENTITY_PLAYER_SWIM
+            || sound == SoundEvents.ENTITY_PLAYER_SPLASH
+            || sound == SoundEvents.ENTITY_PLAYER_BIG_FALL
+            || sound == SoundEvents.ENTITY_PLAYER_SMALL_FALL).isPresent();
     }
 
     @Override

@@ -26,7 +26,7 @@ public class AcousticsPlayer implements AcousticLibrary {
     @Override
     public void addAcoustic(String name, Acoustic acoustic) {
         if (acoustics.put(name, acoustic) != null) {
-            PresenceFootsteps.logger.info("Duplicate acoustic: " + name);
+            PresenceFootsteps.logger.info("Duplicate acoustic: {}", name);
         }
     }
 
@@ -53,7 +53,7 @@ public class AcousticsPlayer implements AcousticLibrary {
 
     @SuppressWarnings("deprecation")
     private void playVanillaStep(Association association, Options options) {
-        if (association.state().isLiquid()) {
+        if (association.state().isLiquid() || association.source() == null) {
             return;
         }
         BlockSoundGroup soundType = association.state().getSoundGroup();
@@ -76,7 +76,7 @@ public class AcousticsPlayer implements AcousticLibrary {
         for (String acousticName : sounds.names()) {
             Acoustic acoustic = acoustics.get(acousticName);
             if (acoustic == null) {
-                PresenceFootsteps.logger.warn("Tried to play a missing acoustic: " + acousticName);
+                PresenceFootsteps.logger.warn("Tried to play a missing acoustic: {}", acousticName);
             } else {
                 acoustic.playSound(soundPlayer, location, event, inputOptions);
             }

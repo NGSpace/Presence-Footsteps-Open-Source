@@ -16,7 +16,7 @@ public interface Loadable {
 
     /**
      * Loads new entries from the given config reader.
-     * The read values will added to any existing ones.
+     * The read values will be added to any existing ones.
      */
     default void load(Reader reader) {
         JsonObject json = GSON.fromJson(reader, JsonObject.class);

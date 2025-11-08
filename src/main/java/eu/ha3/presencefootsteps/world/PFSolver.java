@@ -258,7 +258,7 @@ public class PFSolver implements Solver {
                 }
             }
 
-            if (engine.getConfig().foliageSoundsVolume.get() > 0) {
+            if (engine.getConfig().foliageSoundsVolume > 0) {
                 if (entity.getEquippedStack(EquipmentSlot.FEET).isEmpty() || entity.isSprinting()) {
                     if (association.isEmitter() && carpet.getCollisionShape(entity.getEntityWorld(), pos).isEmpty()) {
                         // This condition implies that foliage over a NOT_EMITTER block CANNOT PLAY

@@ -7,15 +7,16 @@ import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import eu.ha3.presencefootsteps.sound.generator.StepSoundGenerator;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import org.jetbrains.annotations.NotNull;
 
 public interface StepSoundSource {
-    Optional<StepSoundGenerator> getStepGenerator(SoundEngine engine);
+    Optional<StepSoundGenerator> presenceFootsteps$getStepGenerator(SoundEngine engine);
 
-    boolean isStepBlocked();
+    boolean presenceFootsteps$isStepBlocked();
 
     final class Container implements StepSoundSource {
         private Locomotion locomotion;
-        private Optional<StepSoundGenerator> stepSoundGenerator;
+        private @NotNull Optional<StepSoundGenerator> stepSoundGenerator = Optional.empty();
 
         private final LivingEntity entity;
 
@@ -24,10 +25,10 @@ public interface StepSoundSource {
         }
 
         @Override
-        public Optional<StepSoundGenerator> getStepGenerator(SoundEngine engine) {
+        public Optional<StepSoundGenerator> presenceFootsteps$getStepGenerator(SoundEngine engine) {
             Locomotion loco = engine.getIsolator().locomotions().lookup(entity);
 
-            if (stepSoundGenerator == null || loco != locomotion) {
+            if (stepSoundGenerator.isEmpty() || loco != locomotion) {
                 locomotion = loco;
                 stepSoundGenerator = loco.supplyGenerator(entity, engine);
             }
@@ -35,12 +36,12 @@ public interface StepSoundSource {
         }
 
         @Override
-        public boolean isStepBlocked() {
+        public boolean presenceFootsteps$isStepBlocked() {
             SoundEngine engine = PresenceFootsteps.getInstance().getEngine();
             if (!engine.getConfig().isExclusiveMode() && !(entity instanceof PlayerEntity)) {
                 return false;
             }
-            return engine.isEnabledFor(entity) && getStepGenerator(engine).isPresent();
+            return engine.isEnabledFor(entity) && presenceFootsteps$getStepGenerator(engine).isPresent();
         }
     }
 }

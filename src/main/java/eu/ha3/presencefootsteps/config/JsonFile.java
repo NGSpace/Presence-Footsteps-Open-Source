@@ -3,6 +3,7 @@ package eu.ha3.presencefootsteps.config;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -11,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 
 import eu.ha3.presencefootsteps.PresenceFootsteps;
+import net.minecraft.util.Identifier;
 
 /**
  * Very simple file loaded from and to json.
@@ -20,6 +22,7 @@ import eu.ha3.presencefootsteps.PresenceFootsteps;
 public abstract class JsonFile {
     private transient final Gson gson = new GsonBuilder()
             .registerTypeAdapter(getClass(), (InstanceCreator<JsonFile>)t -> this)
+            .registerTypeAdapter(Identifier.class, new ToStringAdapter<>(Identifier::toString, Identifier::of))
             .setPrettyPrinting()
             .create();
 
