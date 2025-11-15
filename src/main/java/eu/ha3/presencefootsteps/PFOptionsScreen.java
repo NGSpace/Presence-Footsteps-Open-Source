@@ -13,6 +13,7 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.JsonOps;
 import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
@@ -26,6 +27,7 @@ import eu.ha3.presencefootsteps.util.ResourceUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 class PFOptionsScreen {
     public static final Text TITLE = Text.translatable("menu.pf.title");
@@ -45,13 +47,19 @@ class PFOptionsScreen {
                                         .name(Text.translatable("key.presencefootsteps.toggle"))
                                         .description(OptionDescription.of(Text.translatable("menu.pf.disable_mod")))
                                         .binding(false, config::getDisabled, config::setDisabled)
-                                        .controller(TickBoxControllerBuilder::create)
+                                        .controller(opt -> BooleanControllerBuilder.create(opt)
+                                                .formatValue(state ->
+                                                        Text.translatable("key.presencefootsteps.toggle." + (state ? "disabled": "enabled"))
+                                                        .withColor(state ? Formatting.RED.getColorValue() : Formatting.GREEN.getColorValue()))
+                                                .coloured(false))
                                         .build())
                                 .option(Option.<Boolean>createBuilder()
                                         .name(Text.translatable("menu.pf.multiplayer"))
-                                        .description(v -> OptionDescription.of(Text.translatable("menu.pf.multiplayer." + v)))
                                         .binding(true, config::getMultiplayer, config::setMultiplayer)
                                         .controller(TickBoxControllerBuilder::create)
+                                        .controller(opt -> BooleanControllerBuilder.create(opt)
+                                                .formatValue(state -> Text.translatable("menu.pf.multiplayer." + state))
+                                                .coloured(true))
                                         .build())
                                 .build())
                         .group(OptionGroup.createBuilder()
@@ -88,11 +96,13 @@ class PFOptionsScreen {
                                                 return Locomotion.BIPED;
                                             }
                                         })
-                                        .controller(opt -> EnumControllerBuilder.create(opt).enumClass(Locomotion.class))
+                                        .controller(opt -> EnumControllerBuilder.create(opt)
+                                                .enumClass(Locomotion.class)
+                                                .formatValue(Locomotion::getOptionName)
+                                        )
                                         .build())
                                 .option(Option.<EntitySelector>createBuilder()
                                         .name(Text.translatable("menu.pf.footsteps.targets"))
-                                        .description(v -> OptionDescription.of(Text.translatable("menu.pf.global." + v.name().toLowerCase())))
                                         .binding(new Binding<>() {
                                             @Override
                                             public void setValue(EntitySelector value) {
@@ -109,16 +119,20 @@ class PFOptionsScreen {
                                                 return EntitySelector.ALL;
                                             }
                                         })
-                                        .controller(opt -> EnumControllerBuilder.create(opt).enumClass(EntitySelector.class))
+                                        .controller(opt -> EnumControllerBuilder.create(opt).
+                                                enumClass(EntitySelector.class)
+                                                .formatValue(EntitySelector::getOptionName)
+                                        )
                                         .build())
-                                .option(createToggleOption("footwear", true, config::getEnabledFootwear, config::setEnabledFootwear))
-                                .option(createToggleOption("exclusive_mode", true, config::getEnabledFootwear, config::setEnabledFootwear))
+                                .option(createOnOffOption("footwear", true, config::getEnabledFootwear, config::setEnabledFootwear))
+                                .option(createOnOffOption("exclusive_mode", true, config::getEnabledFootwear, config::setEnabledFootwear))
                                 .build())
                         .group(OptionGroup.createBuilder()
                                 .name(Text.translatable("menu.pf.group.debugging"))
                                 .option(ButtonOption.createBuilder()
                                         .name(Text.translatable("menu.pf.report.concise"))
                                         .description(OptionDescription.of(Text.translatable("menu.pf.report.concise.tooltip")))
+                                        .available(MinecraftClient.getInstance().world != null)
                                         .action((screen, opt) -> {
                                             opt.setAvailable(false);
                                             BlockReport.execute(PresenceFootsteps.getInstance().getEngine().getIsolator(), "report_concise", false)
@@ -128,6 +142,7 @@ class PFOptionsScreen {
                                 .option(ButtonOption.createBuilder()
                                         .name(Text.translatable("menu.pf.report.full"))
                                         .description(OptionDescription.of(Text.translatable("menu.pf.report.full.tooltip")))
+                                        .available(MinecraftClient.getInstance().world != null)
                                         .action((screen, opt) -> {
                                             opt.setAvailable(false);
                                             BlockReport.execute(PresenceFootsteps.getInstance().getEngine().getIsolator(), "report_full", false)
@@ -181,12 +196,13 @@ class PFOptionsScreen {
                 .build();
     }
 
-    public Option<Boolean> createToggleOption(String key, Boolean def, Supplier<Boolean> getter, Consumer<Boolean> setter) {
+    public Option<Boolean> createOnOffOption(String key, Boolean def, Supplier<Boolean> getter, Consumer<Boolean> setter) {
         return Option.<Boolean>createBuilder()
                 .name(Text.translatable("menu.pf." + key))
-                .description(v -> OptionDescription.of(Text.translatable("menu.pf." + key + "." + (v ? "on" : "off"))))
                 .binding(def, getter, setter)
-                .controller(TickBoxControllerBuilder::create)
+                .controller(opt -> BooleanControllerBuilder.create(opt)
+                    .onOffFormatter()
+                    .coloured(true))
                 .build();
     }
 }
