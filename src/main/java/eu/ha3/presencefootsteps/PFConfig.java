@@ -5,6 +5,7 @@ import java.util.Set;
 
 import eu.ha3.presencefootsteps.config.EntitySelector;
 import eu.ha3.presencefootsteps.config.JsonFile;
+import eu.ha3.presencefootsteps.sound.SoundEngine;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import net.minecraft.entity.EntityType;
 import net.minecraft.registry.Registries;
@@ -46,12 +47,8 @@ public class PFConfig extends JsonFile {
                 Identifier.ofVanilla("phantom")
             );
 
-
-    private transient final PresenceFootsteps pf;
-
-    public PFConfig(Path file, PresenceFootsteps pf) {
+    public PFConfig(Path file) {
         super(file);
-        this.pf = pf;
     }
 
     public boolean isIgnoredForFootsteps(EntityType<?> type) {
@@ -59,12 +56,7 @@ public class PFConfig extends JsonFile {
     }
 
     public void setLocomotion(Locomotion loco) {
-        if (loco != getLocomotion()) {
-            stance = loco;
-            save();
-
-            pf.getEngine().reload();
-        }
+        stance = loco;
     }
 
     public boolean isVisualiserRunning() {
@@ -107,16 +99,8 @@ public class PFConfig extends JsonFile {
         return !disabled && getGlobalVolume() > 0;
     }
 
-    public boolean toggleDisabled() {
-        disabled = !disabled;
-        pf.onEnabledStateChange(!disabled);
-        return disabled;
-    }
-
     public void setDisabled(boolean disabled) {
-        if (disabled != this.disabled) {
-            toggleDisabled();
-        }
+        this.disabled = disabled;
     }
 
     public int getRunningVolumeIncrease() {
@@ -127,20 +111,8 @@ public class PFConfig extends JsonFile {
         return MathHelper.clamp((int) (volume * 100F), 0, 100);
     }
 
-    public void setGlobalVolumeFloat(float volume) {
-        if (this.volume != volume) {
-            boolean wasEnabled = getEnabled();
-            this.volume = volume;
-            save();
-
-            if (getEnabled() != wasEnabled) {
-                pf.onEnabledStateChange(getEnabled());
-            }
-        }
-    }
-
     public void setGlobalVolume(int volume) {
-        setGlobalVolumeFloat(volume / 100F);
+        this.volume = volume * 0.01F;
     }
 
     public void setRunningVolumeIncrease(Integer volume) {

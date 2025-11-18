@@ -34,7 +34,7 @@ public class LocomotionLookup implements Index<Entity, Locomotion> {
         if (key instanceof PlayerEntity) {
             return config.getLocomotion();
         }
-        return Locomotion.BIPED;
+        return values.getOrDefault(EntityType.getId(key.getType()), Locomotion.BIPED);
     }
 
     @Override

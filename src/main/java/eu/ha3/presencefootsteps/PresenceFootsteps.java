@@ -44,7 +44,7 @@ public class PresenceFootsteps implements ClientModInitializer {
     }
 
     private final Path pfFolder = FabricLoader.getInstance().getConfigDir().resolve("presencefootsteps");
-    private final PFConfig config = new PFConfig(pfFolder.resolve("userconfig.json"), this);
+    private final PFConfig config = new PFConfig(pfFolder.resolve("userconfig.json"));
     private final SoundEngine engine = new SoundEngine(config);
     private final PFDebugHud debugHud = new PFDebugHud(engine);
 
@@ -53,7 +53,8 @@ public class PresenceFootsteps implements ClientModInitializer {
     private final KeyBinding debugToggleKeyBinding = new KeyBinding("key.presencefootsteps.debug_toggle", InputUtil.Type.KEYSYM, InputUtil.GLFW_KEY_Z, KEY_BINDING_CATEGORY);
     private final Edge toggler = new Edge(z -> {
         if (z) {
-            config.toggleDisabled();
+            config.setDisabled(config.getDisabled());
+            saveAndReloadConfig();
         }
     });
     private final Edge debugToggle = new Edge(z -> {
@@ -61,6 +62,7 @@ public class PresenceFootsteps implements ClientModInitializer {
             MinecraftClient.getInstance().debugHudEntryList.toggleVisibility(PFDebugHud.ID);
         }
     });
+    private boolean prevEnabled = config.getEnabled();
 
     public PresenceFootsteps() {
         instance = this;
@@ -76,6 +78,16 @@ public class PresenceFootsteps implements ClientModInitializer {
 
     public PFConfig getConfig() {
         return config;
+    }
+
+    public void saveAndReloadConfig() {
+        config.save();
+        boolean enabled = config.getEnabled();
+        if (prevEnabled != enabled) {
+            showEnabledStateChangeToast(enabled);
+            prevEnabled = enabled;
+        }
+        engine.reload();
     }
 
     public KeyBinding getOptionsKeyBinding() {
@@ -109,8 +121,7 @@ public class PresenceFootsteps implements ClientModInitializer {
         });
     }
 
-    void onEnabledStateChange(boolean enabled) {
-        engine.reload();
+    void showEnabledStateChangeToast(boolean enabled) {
         showSystemToast(
                 MOD_NAME,
                 Text.translatable("key.presencefootsteps.toggle." + (enabled ? "enabled" : "disabled")).formatted(enabled ? Formatting.GREEN : Formatting.GRAY)

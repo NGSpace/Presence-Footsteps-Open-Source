@@ -179,7 +179,9 @@ class PFOptionsScreen {
                                         .build())
                                 .build())
                         .build())
-                .save(config::save)
+                .save(() -> {
+                    PresenceFootsteps.getInstance().saveAndReloadConfig();
+                })
                 .build()
                 .generateScreen(parentScreen);
     }
