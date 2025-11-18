@@ -13,7 +13,7 @@ Removed Dependencies:
 - kirin Fabric GUI library: used for the configuration menu, replaced with YetAnotherConfigLib as kirin usually lags behind the latest minecraft versions.
 - Mine Little Pony Fabric mod: compatibility for the Mine Little Pony mod that turns players and mobs into Ponies, the compatibility is dropped as it is not a widely used feature
 
-> Removing these dependencies should not effect the functionality of the mod for most people, while having them forces support for newer minecraft versions to come with significant delay, sometimes by up to several weeks.
+> Removing these dependencies should not affect the functionality of the mod for most people, while having them forces support for newer minecraft versions to come with significant delay, sometimes by up to several weeks.
 
 Removing these dependencies enables us to maintain this mod way easier and faster in the future, and potentially enable support for Forge and other mod loaders.
 
