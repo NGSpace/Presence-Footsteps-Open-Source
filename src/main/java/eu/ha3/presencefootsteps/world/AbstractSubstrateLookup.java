@@ -21,8 +21,8 @@ abstract class AbstractSubstrateLookup<T> implements Lookup.DataSegment<T> {
             final String substrate = split.length > 1 ? split[1] : Substrates.DEFAULT;
 
             substrates
-                    .computeIfAbsent(substrate, s -> new Object2ObjectLinkedOpenHashMap<>())
-                    .put(Identifier.of(primitive), Optional.of(SoundsKey.of(entry.getValue().getAsString())));
+                .computeIfAbsent(substrate, s -> new Object2ObjectLinkedOpenHashMap<>())
+                .put(Identifier.of(primitive), Optional.of(SoundsKey.of(entry.getValue().getAsString())));
         });
     }
 

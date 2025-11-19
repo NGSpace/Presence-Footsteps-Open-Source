@@ -16,9 +16,9 @@ import net.minecraft.util.Util;
 public class HeuristicStateLookup {
     private final Function<Block, Optional<Block>> leafBlockCache = Util.memoize(block -> {
         return Stream.of(Registries.BLOCK.getId(block).getPath())
-                .flatMap(id -> Arrays.stream(id.split("_")))
-                .flatMap(part -> Registries.BLOCK.getOptionalValue(Identifier.of(part + "_leaves")).stream())
-                .findFirst();
+            .flatMap(id -> Arrays.stream(id.split("_")))
+            .flatMap(part -> Registries.BLOCK.getOptionalValue(Identifier.of(part + "_leaves")).stream())
+            .findFirst();
     });
 
     @Nullable

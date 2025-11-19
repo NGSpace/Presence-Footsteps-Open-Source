@@ -59,9 +59,9 @@ public interface ResourceUtils {
 
     @SuppressWarnings("unchecked")
     static <T, K, V> Map<K, V> loadDir(ResourceFinder finder, ResourceManager manager,
-                                       Function<JsonObject, T> reader,
-                                       Function<Identifier, @Nullable K> keyMapper,
-                                       Function<Stream<T>, @Nullable V> valueMapper) {
+            Function<JsonObject, T> reader,
+            Function<Identifier, @Nullable K> keyMapper,
+            Function<Stream<T>, @Nullable V> valueMapper) {
         return Map.ofEntries(finder.findAllResources(manager).entrySet().stream()
                 .map(entry -> {
                     K k = keyMapper.apply(entry.getKey());
