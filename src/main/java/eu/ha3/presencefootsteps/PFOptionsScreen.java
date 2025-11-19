@@ -125,7 +125,7 @@ class PFOptionsScreen {
                                         )
                                         .build())
                                 .option(createOnOffOption("footwear", true, config::getEnabledFootwear, config::setEnabledFootwear))
-                                .option(createOnOffOption("exclusive_mode", true, config::getEnabledFootwear, config::setEnabledFootwear))
+                                .option(createOnOffOption("exclusive_mode", false, config::isExclusiveMode, config::setExclusiveMode))
                                 .build())
                         .group(OptionGroup.createBuilder()
                                 .name(Text.translatable("menu.pf.group.debugging"))

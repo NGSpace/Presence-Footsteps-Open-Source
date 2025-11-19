@@ -187,4 +187,8 @@ public class PFConfig extends JsonFile {
     public void setEnabledFootwear(@NotNull Boolean value) {
         this.footwear = value;
     }
+
+    public void setExclusiveMode(Boolean value) {
+        this.exclusive = value;
+    }
 }
