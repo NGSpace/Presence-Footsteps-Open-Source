@@ -1,7 +1,6 @@
 package eu.ha3.presencefootsteps.world;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,8 +21,8 @@ abstract class AbstractSubstrateLookup<T> implements Lookup.DataSegment<T> {
             final String substrate = split.length > 1 ? split[1] : Substrates.DEFAULT;
 
             substrates
-                .computeIfAbsent(substrate, s -> new Object2ObjectLinkedOpenHashMap<>())
-                .put(Identifier.of(primitive), Optional.of(SoundsKey.of(entry.getValue().getAsString())));
+                    .computeIfAbsent(substrate, s -> new Object2ObjectLinkedOpenHashMap<>())
+                    .put(Identifier.of(primitive), Optional.of(SoundsKey.of(entry.getValue().getAsString())));
         });
     }
 
@@ -35,7 +34,7 @@ abstract class AbstractSubstrateLookup<T> implements Lookup.DataSegment<T> {
             return Optional.empty();
         }
         final Identifier id = getId(key);
-        return Objects.requireNonNull(getSubstrateMap(id, substrate)).getOrDefault(id, Optional.empty());
+        return getSubstrateMap(id, substrate).getOrDefault(id, Optional.empty());
     }
 
     @Nullable

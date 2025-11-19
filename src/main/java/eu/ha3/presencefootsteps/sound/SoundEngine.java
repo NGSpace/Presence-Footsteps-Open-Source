@@ -9,7 +9,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
-import eu.ha3.presencefootsteps.sound.generator.StepSoundGenerator;
 import net.minecraft.resource.ResourceReloader;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +30,8 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.ShulkerEntity;
 import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.AbstractMinecartEntity;
+import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.ResourceManager;
@@ -81,7 +82,7 @@ public class SoundEngine implements ResourceReloader {
             volume *= config.passiveEntitiesVolume;
         }
 
-        float runningProgress = ((StepSoundSource) source).presenceFootsteps$getStepGenerator(this)
+        float runningProgress = ((StepSoundSource) source).getStepGenerator(this)
                 .map(generator -> generator.getMotionTracker().getSpeedScalingRatio(source))
                 .orElse(0F);
 
@@ -109,7 +110,7 @@ public class SoundEngine implements ResourceReloader {
     }
 
     public boolean isEnabledFor(Entity entity) {
-        return isRunning(MinecraftClient.getInstance()) && config.getEntitySelector().test(entity);
+        return hasData() && isRunning(MinecraftClient.getInstance()) && config.getEntitySelector().test(entity);
     }
 
     public boolean hasData() {
@@ -127,17 +128,21 @@ public class SoundEngine implements ResourceReloader {
     }
 
     private Stream<? extends Entity> getTargets(final Entity cameraEntity) {
-        final List<? extends Entity> entities = cameraEntity.getEntityWorld().getOtherEntities(null, cameraEntity.getBoundingBox().expand(16), e -> e instanceof LivingEntity
-                && !config.isIgnoredForFootsteps(e.getType())
-                && !(e instanceof WaterCreatureEntity)
-                && !(e instanceof ShulkerEntity || e instanceof ArmorStandEntity)
-                && !isolator.golems().contains(e.getType())
-                && !e.hasVehicle()
-                && !((LivingEntity)e).isSleeping()
-                && (!(e instanceof PlayerEntity) || !e.isSpectator())
-                && e.squaredDistanceTo(cameraEntity) <= 256
-                && config.getEntitySelector().test(e)
-        );
+        final List<? extends Entity> entities = cameraEntity.getEntityWorld().getOtherEntities(null, cameraEntity.getBoundingBox().expand(16), e -> {
+            return e instanceof LivingEntity
+                    && !config.isIgnoredForFootsteps(e.getType())
+                    && !(e instanceof WaterCreatureEntity)
+                    && !(e instanceof ShulkerEntity
+                    || e instanceof ArmorStandEntity
+                    || e instanceof BoatEntity
+                    || e instanceof AbstractMinecartEntity)
+                    && !isolator.golems().contains(e.getType())
+                    && !e.hasVehicle()
+                    && !((LivingEntity)e).isSleeping()
+                    && (!(e instanceof PlayerEntity) || !e.isSpectator())
+                    && e.squaredDistanceTo(cameraEntity) <= 256
+                    && config.getEntitySelector().test(e);
+        });
 
         final Comparator<Entity> nearest = Comparator.comparingDouble(e -> e.squaredDistanceTo(cameraEntity));
 
@@ -146,17 +151,19 @@ public class SoundEngine implements ResourceReloader {
         }
         Set<Integer> alreadyVisited = new HashSet<>();
         return entities.stream()
-            .sorted(nearest)
-                    // Always play sounds for players and the entities closest to the camera
-                        // If multiple entities share the same block, only play sounds for one of each distinct type
-            .filter(e -> e == cameraEntity || e instanceof PlayerEntity || (alreadyVisited.size() < config.getMaxSteppingEntities() && alreadyVisited.add(Objects.hash(e.getType(), e.getBlockPos()))));
+                .sorted(nearest)
+                // Always play sounds for players and the entities closest to the camera
+                // If multiple entities share the same block, only play sounds for one of each distinct type
+                .filter(e -> e == cameraEntity || e instanceof PlayerEntity || (alreadyVisited.size() < config.getMaxSteppingEntities() && alreadyVisited.add(Objects.hash(e.getType(), e.getBlockPos()))));
     }
 
     public void onFrame(MinecraftClient client, Entity cameraEntity) {
         if (isRunning(client)) {
             getTargets(cameraEntity).forEach(e -> {
                 try {
-                    ((StepSoundSource) e).presenceFootsteps$getStepGenerator(this).ifPresent(StepSoundGenerator::generateFootsteps);
+                    ((StepSoundSource) e).getStepGenerator(this).ifPresent(generator -> {
+                        generator.generateFootsteps();
+                    });
                 } catch (Throwable t) {
                     CrashReport report = CrashReport.create(t, "Generating PF sounds for entity");
                     CrashReportSection section = report.addElement("Entity being ticked");
@@ -176,7 +183,7 @@ public class SoundEngine implements ResourceReloader {
         }
     }
 
-    public boolean onSoundReceived(PlaySoundS2CPacket packet) {
+    public boolean onSoundRecieved(PlaySoundS2CPacket packet) {
         @Nullable RegistryEntry<SoundEvent> event = packet.getSound();
         @Nullable ClientWorld world = MinecraftClient.getInstance().world;
 

@@ -27,8 +27,14 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.WorldChunk;
 
-public record PFDebugHud(SoundEngine engine) implements DebugHudEntry {
+public class PFDebugHud implements DebugHudEntry {
     public static final Identifier ID = PresenceFootsteps.id("hud");
+
+    private final SoundEngine engine;
+
+    PFDebugHud(SoundEngine engine) {
+        this.engine = engine;
+    }
 
     @Override
     public boolean canShow(boolean reducedDebugInfo) {
@@ -56,7 +62,9 @@ public record PFDebugHud(SoundEngine engine) implements DebugHudEntry {
                         config.clientPlayerVolume,
                         config.otherPlayerVolume
                 ),
-                String.format("Stepping Mode: %s, Targeting Mode: %s, Footwear: %s", config.getLocomotion(), config.getEntitySelector(), config.getEnabledFootwear()),
+                String.format("Stepping Mode: %s, Targeting Mode: %s, Footwear: %s", config.getLocomotion() == Locomotion.NONE
+                        ? String.format("AUTO (%sDETECTED %s%s)", Formatting.BOLD, Locomotion.forPlayer(client.player, Locomotion.NONE), Formatting.RESET)
+                        : config.getLocomotion(), config.getEntitySelector(), config.getEnabledFootwear()),
                 String.format("Data Loaded: B%s P%s G%s",
                         engine.getIsolator().globalBlocks().getSubstrates().size(),
                         engine.getIsolator().primitives().getSubstrates().size(),
@@ -65,7 +73,7 @@ public record PFDebugHud(SoundEngine engine) implements DebugHudEntry {
                 String.format("Has Resource Pack: %s%s", engine.hasData() ? Formatting.GREEN : Formatting.RED, engine.hasData())
         ));
 
-        if (client.world != null && client.crosshairTarget instanceof BlockHitResult blockHit && blockHit.getType() == HitResult.Type.BLOCK) {
+        if (client.crosshairTarget instanceof BlockHitResult blockHit && blockHit.getType() == HitResult.Type.BLOCK) {
             BlockPos pos = blockHit.getBlockPos();
             BlockState state = client.world.getBlockState(pos);
             BlockPos above = pos.up();
@@ -121,6 +129,18 @@ public record PFDebugHud(SoundEngine engine) implements DebugHudEntry {
         }
         combinedList.append(" ]");
         list.add(combinedList.toString());
+
+        if (!list.isEmpty()) {
+            return list;
+        }
+
+        if (sounds.isEmpty()) {
+            list.add(SoundsKey.UNASSIGNED.raw());
+        } else {
+            sounds.forEach((key, value) -> {
+                list.add((key.isEmpty() ? "default" : key) + ": " + value.raw());
+            });
+        }
 
         return list;
     }

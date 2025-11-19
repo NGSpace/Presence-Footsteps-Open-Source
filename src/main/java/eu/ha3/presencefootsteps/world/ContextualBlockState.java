@@ -8,7 +8,8 @@ import net.minecraft.util.Util;
 
 public record ContextualBlockState(EntityType<?> type, BlockState state) {
     private static final Function<EntityType<?>, Function<BlockState, ContextualBlockState>> CACHE = Util.memoize(
-            entityType -> Util.memoize(state -> new ContextualBlockState(entityType, state)
+            entityType -> Util.memoize(
+                    state -> new ContextualBlockState(entityType, state)
     ));
 
 

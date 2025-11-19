@@ -9,19 +9,17 @@ import eu.ha3.presencefootsteps.sound.StepSoundSource;
 import eu.ha3.presencefootsteps.sound.generator.StepSoundGenerator;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(LivingEntity.class)
 abstract class MLivingEntity extends Entity implements StepSoundSource {
     MLivingEntity() {super(null, null);}
-    @Unique
     private final StepSoundSource stepSoundSource = new StepSoundSource.Container((LivingEntity)(Object)this);
     @Override
-    public Optional<StepSoundGenerator> presenceFootsteps$getStepGenerator(SoundEngine engine) {
-        return stepSoundSource.presenceFootsteps$getStepGenerator(engine);
+    public Optional<StepSoundGenerator> getStepGenerator(SoundEngine engine) {
+        return stepSoundSource.getStepGenerator(engine);
     }
     @Override
-    public boolean presenceFootsteps$isStepBlocked() {
-        return stepSoundSource.presenceFootsteps$isStepBlocked();
+    public boolean isStepBlocked() {
+        return stepSoundSource.isStepBlocked();
     }
 }

@@ -1,7 +1,6 @@
 package eu.ha3.presencefootsteps.sound.acoustics;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -28,8 +27,8 @@ public interface Acoustic {
     Map<String, MapCodec<? extends Acoustic>> TYPES = new Object2ObjectOpenHashMap<>();
     MapCodec<Acoustic> MAP_CODEC = Codec.STRING.dispatchMap(Acoustic::type, TYPES::get);
     Codec<Acoustic> CODEC = Codec.xor(Codec.lazyInitialized(() -> SimultaneousAcoustic.CODEC.xmap(i -> (Acoustic)i, i-> (SimultaneousAcoustic)i)), MAP_CODEC.codec()).xmap(
-            Either::unwrap,
-            acoustic -> Objects.equals(acoustic.type(), "simultaneous") ? Either.left(acoustic) : Either.right(acoustic)
+            either -> Either.unwrap(either),
+            acoustic -> acoustic.type() == "simultaneous" ? Either.left(acoustic) : Either.right(acoustic)
     );
     String BASIC = register("basic", VaryingAcoustic.CODEC);
     String EVENTS = register("events", EventSelectorAcoustics.CODEC);

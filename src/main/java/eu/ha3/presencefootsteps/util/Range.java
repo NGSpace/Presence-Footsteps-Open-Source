@@ -13,11 +13,11 @@ import net.minecraft.util.math.MathHelper;
 public record Range (float min, float max) {
     private static final Codec<Float> PERCENTAGE_CODEC = Codec.FLOAT.xmap(i -> i / 100F, i -> i * 100F);
     private static final Codec<Range> RANGE_CODEC = RecordCodecBuilder.create(i -> i.group(
-        PERCENTAGE_CODEC.fieldOf("min").forGetter(Range::min),
-        PERCENTAGE_CODEC.fieldOf("max").forGetter(Range::max)
+            PERCENTAGE_CODEC.fieldOf("min").forGetter(Range::min),
+            PERCENTAGE_CODEC.fieldOf("max").forGetter(Range::max)
     ).apply(i, Range::new));
     private static final Codec<Range> POINT_CODEC = PERCENTAGE_CODEC.xmap(Range::exactly, Range::min);
-    public static final Codec<Range> CODEC = Codec.xor(POINT_CODEC, RANGE_CODEC).xmap(Either::unwrap, i -> MathHelper.approximatelyEquals(i.min(), i.max()) ? Either.left(i) : Either.right(i));
+    public static final Codec<Range> CODEC = Codec.xor(POINT_CODEC, RANGE_CODEC).xmap(either -> Either.unwrap(either), i -> MathHelper.approximatelyEquals(i.min(), i.max()) ? Either.left(i) : Either.right(i));
 
     public static final Range DEFAULT = exactly(1);
 
@@ -34,8 +34,8 @@ public record Range (float min, float max) {
             JsonElement element = json.get(name);
             if (element.isJsonObject()) {
                 return new Range(
-                    getPercentage(element.getAsJsonObject(), "min", min),
-                    getPercentage(element.getAsJsonObject(), "max", max)
+                        getPercentage(element.getAsJsonObject(), "min", min),
+                        getPercentage(element.getAsJsonObject(), "max", max)
                 );
             }
             return exactly(getPercentage(json, name, min));

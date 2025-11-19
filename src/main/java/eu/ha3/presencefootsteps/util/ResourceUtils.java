@@ -31,7 +31,7 @@ public interface ResourceUtils {
                 consumer.accept(stream);
                 return 1;
             } catch (Exception e) {
-                PresenceFootsteps.logger.error("Error encountered loading resource {} from pack{}", id, res.getPackId(), e);
+                PresenceFootsteps.logger.error("Error encountered loading resource " + id + " from pack" + res.getPackId(), e);
                 return 0;
             }
         }).sum() > 0;
@@ -46,7 +46,7 @@ public interface ResourceUtils {
             try (JsonReader stream = new JsonReader(new InputStreamReader(res.getInputStream()))) {
                 return reader.apply(Streams.parse(stream).getAsJsonObject());
             } catch (Exception e) {
-                PresenceFootsteps.logger.error("Error encountered loading resource {} from pack{}", id, res.getPackId(), e);
+                PresenceFootsteps.logger.error("Error encountered loading resource " + id + " from pack" + res.getPackId(), e);
                 return (T)null;
             }
         }).filter(Objects::nonNull);
@@ -59,9 +59,9 @@ public interface ResourceUtils {
 
     @SuppressWarnings("unchecked")
     static <T, K, V> Map<K, V> loadDir(ResourceFinder finder, ResourceManager manager,
-            Function<JsonObject, T> reader,
-            Function<Identifier, @Nullable K> keyMapper,
-            Function<Stream<T>, @Nullable V> valueMapper) {
+                                       Function<JsonObject, T> reader,
+                                       Function<Identifier, @Nullable K> keyMapper,
+                                       Function<Stream<T>, @Nullable V> valueMapper) {
         return Map.ofEntries(finder.findAllResources(manager).entrySet().stream()
                 .map(entry -> {
                     K k = keyMapper.apply(entry.getKey());
