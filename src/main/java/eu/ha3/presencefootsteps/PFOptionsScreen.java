@@ -194,7 +194,7 @@ class PFOptionsScreen {
                 .binding(def, getter, setter)
                 .controller(opt -> IntegerSliderControllerBuilder.create(opt)
                         .range(min, max)
-                        .step(1)
+                        .step(5)
                 )
                 .build();
     }
