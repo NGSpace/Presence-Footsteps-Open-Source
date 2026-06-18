@@ -38,7 +38,10 @@ public interface StepSoundSource {
         @Override
         public boolean isStepBlocked() {
             SoundEngine engine = PresenceFootsteps.getInstance().getEngine();
-            if (!Minecraft.getInstance().isSingleplayer() && Minecraft.getInstance().hasSingleplayerServer()) {
+
+            Minecraft client = Minecraft.getInstance();
+            boolean isSinglePlayer = client.getSingleplayerServer() != null && client.getSingleplayerServer().isPublished();
+            if (!isSinglePlayer && client.hasSingleplayerServer()) {
                 return true;// Allow footsteps when in lan and multiplayer
             }
             if (!engine.getConfig().isExclusiveMode() && !(entity instanceof Player)) {

@@ -112,9 +112,9 @@ public class PresenceFootsteps implements ClientModInitializer {
 
     private void onTick(Minecraft client) {
         Optional.ofNullable(client.player).filter(e -> !e.isRemoved()).ifPresent(cameraEntity -> {
-            if (client.screen == null) {
+            if (client.gui.screen() == null) {
                 if (optionsKeyBinding.isDown()) {
-                    client.setScreen(new PFOptionsScreen().build(client.screen));
+                    client.gui.setScreen(new PFOptionsScreen().build(client.gui.screen()));
                 }
                 toggler.accept(toggleKeyBinding.isDown());
             }
@@ -137,7 +137,7 @@ public class PresenceFootsteps implements ClientModInitializer {
 
     public void showSystemToast(Component title, Component body) {
         Minecraft client = Minecraft.getInstance();
-        client.getToastManager().addToast(SystemToast.multiline(client, SystemToast.SystemToastId.PACK_LOAD_FAILURE, title, body));
+        client.gui.toastManager().addToast(new SystemToast(SystemToast.SystemToastId.PACK_LOAD_FAILURE, title, body));
     }
 
     public void saveAndReloadConfig() {
