@@ -103,7 +103,7 @@ class PFOptionsScreen {
                                         )
                                         .build())
                                 .option(Option.<EntitySelector>createBuilder()
-                                        .name(Component.translatable("menu.pf.footsteps.targets"))
+                                        .name(Component.translatable("menu.pf.global"))
                                         .binding(new Binding<>() {
                                             @Override
                                             public void setValue(EntitySelector value) {

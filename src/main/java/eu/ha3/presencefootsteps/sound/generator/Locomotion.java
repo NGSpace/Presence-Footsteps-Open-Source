@@ -45,7 +45,7 @@ public enum Locomotion {
     }
 
     public Component getOptionName() {
-        return Component.translatable("menu.pf.stance", Component.translatable(this == NONE ? AUTO_TRANSLATION_KEY : translationKey));
+        return Component.translatable(this == NONE ? AUTO_TRANSLATION_KEY : translationKey);
     }
 
     public Component getOptionTooltip() {
