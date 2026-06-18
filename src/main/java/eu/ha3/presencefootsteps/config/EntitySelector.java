@@ -1,7 +1,10 @@
 package eu.ha3.presencefootsteps.config;
 
+import java.util.Locale;
 import java.util.function.Predicate;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -27,4 +30,10 @@ public enum EntitySelector implements Predicate<Entity> {
     };
 
     public static final EntitySelector[] VALUES = values();
+
+    private final String translationKey = "menu.pf.global." + name().toLowerCase(Locale.ROOT);
+
+    public Component getOptionName() {
+        return Component.translatable(translationKey).withStyle(name().equals("ALL") ? ChatFormatting.GREEN : ChatFormatting.RESET);
+    }
 }

@@ -53,14 +53,14 @@ public class PFDebugHud implements DebugScreenEntry {
                 String.format("Enabled: %s, Multiplayer: %s, Running: %s", config.getEnabled(), config.getEnabledMP(), engine.isRunning(client)),
                 String.format("Volume: Global[G: %s%%, W: %s%%, F: %s%%]",
                         config.getGlobalVolume(),
-                        config.wetSoundsVolume,
-                        config.foliageSoundsVolume
+                        config.getWetSoundsVolume(),
+                        config.getFoliageSoundsVolume()
                 ),
                 String.format("Entities[H: %s%%, P: %s%%], Players[U: %s%%, T: %s%% ]",
-                        config.hostileEntitiesVolume,
-                        config.passiveEntitiesVolume,
-                        config.clientPlayerVolume,
-                        config.otherPlayerVolume
+                        config.getHostileEntitiesVolume(),
+                        config.getPassiveEntitiesVolume(),
+                        config.getClientPlayerVolume(),
+                        config.getOtherPlayerVolume()
                 ),
                 String.format("Stepping Mode: %s, Targeting Mode: %s, Footwear: %s", config.getLocomotion() == Locomotion.NONE
                         ? String.format("AUTO (%sDETECTED %s%s)", ChatFormatting.BOLD, Locomotion.forPlayer(client.player, Locomotion.NONE), ChatFormatting.RESET)

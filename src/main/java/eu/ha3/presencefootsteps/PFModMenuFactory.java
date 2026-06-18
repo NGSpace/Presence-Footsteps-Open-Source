@@ -6,6 +6,6 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 public class PFModMenuFactory implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return PFOptionsScreen::new;
+        return new PFOptionsScreen()::build;
     }
 }

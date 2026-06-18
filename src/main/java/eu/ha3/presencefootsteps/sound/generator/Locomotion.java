@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import eu.ha3.presencefootsteps.sound.SoundEngine;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -58,19 +57,11 @@ public enum Locomotion {
     }
 
     public static Locomotion forLiving(Entity entity, Locomotion fallback) {
-        if (MineLP.hasPonies()) {
-            return MineLP.getLocomotion(entity, fallback);
-        }
-
         return fallback;
     }
 
     public static Locomotion forPlayer(Player ply, Locomotion preference) {
         if (preference == NONE) {
-            if (ply instanceof LocalPlayer && MineLP.hasPonies()) {
-                return MineLP.getLocomotion(ply);
-            }
-
             return Locomotion.BIPED;
         }
 

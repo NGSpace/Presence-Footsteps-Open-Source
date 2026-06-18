@@ -40,10 +40,8 @@ System.out.println "Outlet MC Versions: ${outlet.mcVersions()}"
 repositories {
     flatDir { dirs 'lib' }
     mavenLocal()
-    maven { name 'pehkui'; url 'https://jitpack.io' }
     maven { name 'modmenu'; url 'https://maven.terraformersmc.com/releases' }
-    maven { name 'minelp'; url 'https://repo.minelittlepony-mod.com/maven/snapshot' }
-    maven { name 'minelp-release'; url 'https://repo.minelittlepony-mod.com/maven/release' }
+    maven {name 'Xander Maven'; url 'https://maven.isxander.dev/releases' }
 }
 
 dependencies {
@@ -58,14 +56,7 @@ dependencies {
     api fabricApi.module("fabric-block-api-v1", project.fabric_version)
     api fabricApi.module("fabric-transitive-access-wideners-v1", project.fabric_version)
 
-    api "com.minelittlepony:kirin:${project.kirin_version}"
-    include "com.minelittlepony:kirin:${project.kirin_version}"
-
-    if (project.use_minelp == '1') {
-      compileOnly "com.minelittlepony:minelittlepony:${project.minelp_version}"
-    } else {
-      compileOnly "com.minelittlepony:minelittlepony:${project.minelp_version}:api"
-    }
+    implementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
     compileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
 }
 
@@ -77,8 +68,10 @@ processResources {
                 "minecraftVersion": project.minecraft_version_range,
                 "loaderVersion": ">=${project.loader_version}",
                 "fabricVersion": ">=${project.fabric_version}",
-                "kirinVersion": ">=${kirin_version}",
-                "minelpVersion": ">=${project.minelp_version}"
+                "yaclVersion": ">=${project.yacl_version}",
+                "modmenuVersion": ">=${project.modmenu_version}",
+                "name": "${project.displayname}",
+                "description": "${project.description}"
     }
 
     from 'LICENSE'
@@ -101,15 +94,15 @@ modrinth {
     //featured = true
     versionNumber = version.toString()
     versionName = project.name + '-' + version
-    changelog = "[Changelog](https://github.com/Sollace/Presence-Footsteps/releases/tag/${version.toString()})"
+    changelog = "[Changelog](https://github.com/amiralimollaei/Presence-Footsteps-Lite/releases/tag/${version.toString()})"
     loaders = ['fabric', 'quilt']
     uploadFile = jar
     outlet.mcVersions().each{ver ->
       gameVersions.add ver
     }
     dependencies {
-       required.project 'P7dR8mSH' // Fabric API
-       optional.project 'JBjInUXM' // Mine Little Pony
-       embedded.project '9aNz8Zqn' // Kirin
+      required.project 'P7dR8mSH' // Fabric API
+      required.project '1eAoo2KR' // Yet Another Config Lib
+      optional.project 'mOgUt4GM' // ModMenu
     }
 }

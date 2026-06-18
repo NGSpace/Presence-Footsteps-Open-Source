@@ -16,8 +16,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
-import com.minelittlepony.common.client.gui.GameGui;
-import com.minelittlepony.common.util.GamePaths;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import eu.ha3.mc.quick.update.UpdateChecker;
@@ -50,8 +48,8 @@ public class PresenceFootsteps implements ClientModInitializer {
         return instance;
     }
 
-    private final Path pfFolder = GamePaths.getConfigDirectory().resolve("presencefootsteps");
-    private final PFConfig config = new PFConfig(pfFolder.resolve("userconfig.json"), this);
+    private final Path pfFolder = FabricLoader.getInstance().getConfigDir().resolve("presencefootsteps");
+    private final PFConfig config = new PFConfig(pfFolder.resolve("userconfig.json"));
     private final SoundEngine engine = new SoundEngine(config);
     private final PFDebugHud debugHud = new PFDebugHud(engine);
 
@@ -65,19 +63,16 @@ public class PresenceFootsteps implements ClientModInitializer {
 
     private final KeyMapping optionsKeyBinding = new KeyMapping("key.presencefootsteps.settings", InputConstants.Type.KEYSYM, InputConstants.KEY_F10, KEY_BINDING_CATEGORY);
     private final KeyMapping toggleKeyBinding = new KeyMapping("key.presencefootsteps.toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, KEY_BINDING_CATEGORY);
-    private final KeyMapping debugToggleKeyBinding = new KeyMapping("key.presencefootsteps.debug_toggle", InputConstants.Type.KEYSYM, InputConstants.KEY_Z, KEY_BINDING_CATEGORY);
     private final Edge toggler = new Edge(z -> {
         if (z) {
-            config.toggleDisabled();
-        }
-    });
-    private final Edge debugToggle = new Edge(z -> {
-        if (z) {
-            Minecraft.getInstance().debugEntries.toggleStatus(PFDebugHud.ID);
+            config.setDisabled(!config.getDisabled());
+            saveAndReloadConfig();
         }
     });
 
     private final AtomicBoolean configChanged = new AtomicBoolean();
+    private boolean prevEnabled = config.getEnabled();
+
 
     public PresenceFootsteps() {
         instance = this;
@@ -107,27 +102,19 @@ public class PresenceFootsteps implements ClientModInitializer {
     public void onInitializeClient() {
         updaterConfig.load();
         config.load();
-        config.onChangedExternally(_ -> configChanged.set(true));
 
         KeyMappingHelper.registerKeyMapping(optionsKeyBinding);
         KeyMappingHelper.registerKeyMapping(toggleKeyBinding);
-        KeyMappingHelper.registerKeyMapping(debugToggleKeyBinding);
         ClientTickEvents.END_CLIENT_TICK.register(this::onTick);
         ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(SoundEngine.ID, engine);
         DebugScreenEntries.register(PFDebugHud.ID, debugHud);
     }
 
     private void onTick(Minecraft client) {
-        if (client.screen instanceof PFOptionsScreen screen && configChanged.getAndSet(false)) {
-            screen.init(screen.width, screen.height);
-        }
-
-        debugToggle.accept(GameGui.isKeyDown(InputConstants.KEY_F3) && debugToggleKeyBinding.isDown());
-
         Optional.ofNullable(client.player).filter(e -> !e.isRemoved()).ifPresent(cameraEntity -> {
             if (client.screen == null) {
                 if (optionsKeyBinding.isDown()) {
-                    client.setScreen(new PFOptionsScreen(client.screen));
+                    client.setScreen(new PFOptionsScreen().build(client.screen));
                 }
                 toggler.accept(toggleKeyBinding.isDown());
             }
@@ -151,5 +138,15 @@ public class PresenceFootsteps implements ClientModInitializer {
     public void showSystemToast(Component title, Component body) {
         Minecraft client = Minecraft.getInstance();
         client.getToastManager().addToast(SystemToast.multiline(client, SystemToast.SystemToastId.PACK_LOAD_FAILURE, title, body));
+    }
+
+    public void saveAndReloadConfig() {
+        config.save();
+        boolean enabled = config.getEnabled();
+        if (prevEnabled != enabled) {
+            onEnabledStateChange(enabled);
+            prevEnabled = enabled;
+        }
+        engine.reload();
     }
 }
