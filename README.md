@@ -1,10 +1,12 @@
-# Presence-Footsteps
-[![Build Status](https://github.com/Sollace/Presence-Footsteps/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/MineLittlePony/Kirin/actions/workflows/gradle-build.yml)
-[![Version](https://img.shields.io/github/v/release/Sollace/Presence-Footsteps)](https://github.com/Sollace/Presence-Footsteps/releases/latest)
-![License](https://img.shields.io/github/license/Sollace/Presence-Footsteps)
+# Presence-Footsteps Lite
+[![Build Status](https://github.com/amiralimollaei/Presence-Footsteps-Lite/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/MineLittlePony/Kirin/actions/workflows/gradle-build.yml)
+[![Version](https://img.shields.io/github/v/release/amiralimollaei/Presence-Footsteps-Lite)](https://github.com/Sollace/Presence-Footsteps/releases/latest)
+![License](https://img.shields.io/github/license/amiralimollaei/Presence-Footsteps-Lite)
 ![](https://img.shields.io/badge/api-fabric-orange.svg)
 
-_..An Overly complicated Sound Mod..._
+_..An Overly complicated Sound Mod... Made slightly less complicated!_
+
+A fork of Sollace's fork of Presence-Footsteps that removes overly complicated dependencies, therefore is easier to maintain and significantly faster to update to newer minecraft versions.
 
 ---
 
@@ -47,4 +49,4 @@ Note that you need **at least one** sounds pack enabled for the mod to function.
 
 Presence Footsteps will attempt to figure out the sounds of modded blocks by looking at the vanilla material/sound types they use.
 If your mod is using very unique sounds though, you can add mappings to your mod to directly control what sounds presence footsteps uses for your block by
-following the [guide on our wiki](https://github.com/Sollace/Presence-Footsteps/wiki/Information-for-Resourcepack-Creators)
+following the [guide on Sollace's wiki](https://github.com/Sollace/Presence-Footsteps/wiki/Information-for-Resourcepack-Creators)

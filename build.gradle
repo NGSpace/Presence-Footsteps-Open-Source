@@ -19,7 +19,6 @@ java {
 }
 
 group = project.group
-description = project.displayname
 
 base {
     archivesName = project.name
@@ -57,7 +56,7 @@ dependencies {
     api fabricApi.module("fabric-transitive-access-wideners-v1", project.fabric_version)
 
     implementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
-    compileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+    implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
 processResources {
