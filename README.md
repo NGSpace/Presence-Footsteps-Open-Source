@@ -3,7 +3,7 @@
 
 _..An Overly complicated Sound Mod... Made slightly less complicated!_
 
-A fork of amiralimollaei's fork of Presence-Footsteps-Lite that maintains it's original open source license
+A fork of Sollace's Presence-Footsteps that maintains it's original open source license
 
 ---
 
