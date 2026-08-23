@@ -5,11 +5,11 @@
   "name": "${name}",
   "description": "${description}",
   "authors": [
-    "Hurricaaane (Ha3)", "Sollace", "AmirAli Mollaei"
+    "Hurricaaane (Ha3)", "Sollace", "AmirAli Mollaei", "NGSpace"
   ],
   "contact": {
-    "sources": "https://github.com/amiralimollaei/Presence-Footsteps-Lite",
-    "issues": "https://github.com/amiralimollaei/Presence-Footsteps-Lite/issues"
+    "sources": "https://github.com/NGSpace/Presence-Footsteps-Open-Source",
+    "issues": "https://github.com/NGSpace/Presence-Footsteps-Open-Source/issues"
   },
   "license": "MIT",
   "icon": "logo.png",
@@ -38,9 +38,8 @@
   "custom": {
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://discord.gg/BFmZU9kUbR",
-        "modmenu.github_releases": "https://github.com/amiralimollaei/Presence-Footsteps-Lite/releases",
-        "modmenu.modrinth": "https://modrinth.com/mod/presence-footsteps-lite"
+        "modmenu.discord": "https://ngspace.dev/discord",
+        "modmenu.modrinth": "https://modrinth.com/mod/presence-footsteps-open-source"
       },
       "update_checker": true
     }
