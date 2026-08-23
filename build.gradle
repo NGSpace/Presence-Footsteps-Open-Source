@@ -6,7 +6,6 @@ buildscript {
 plugins {
     id "net.fabricmc.fabric-loom" version "1.15-SNAPSHOT"
     id 'maven-publish'
-    id 'com.modrinth.minotaur' version '2.+'
     id 'org.ajoberstar.reckon' version '0.13.1'
 }
 apply plugin: 'io.github.dexman545.outlet'
@@ -78,30 +77,4 @@ processResources {
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
-}
-
-tasks.modrinth {
-    onlyIf {
-      def stage = version.version.stage.value
-      stage == null || stage.name != 'beta'
-    }
-}
-
-modrinth {
-    token = System.env.MODRINTH_KEY
-    projectId = project.modrinth_project_id
-    //featured = true
-    versionNumber = version.toString()
-    versionName = project.name + '-' + version
-    changelog = "[Changelog](https://github.com/amiralimollaei/Presence-Footsteps-Lite/releases/tag/${version.toString()})"
-    loaders = ['fabric', 'quilt']
-    uploadFile = jar
-    outlet.mcVersions().each{ver ->
-      gameVersions.add ver
-    }
-    dependencies {
-      required.project 'P7dR8mSH' // Fabric API
-      required.project '1eAoo2KR' // Yet Another Config Lib
-      optional.project 'mOgUt4GM' // ModMenu
-    }
 }
