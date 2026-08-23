@@ -5,7 +5,7 @@
   "name": "${name}",
   "description": "${description}",
   "authors": [
-    "Hurricaaane (Ha3)", "Sollace", "AmirAli Mollaei", "NGSpace"
+    "Hurricaaane (Ha3)", "Sollace", "NGSpace"
   ],
   "contact": {
     "sources": "https://github.com/NGSpace/Presence-Footsteps-Open-Source",
